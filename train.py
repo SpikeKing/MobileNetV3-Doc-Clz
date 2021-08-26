@@ -23,6 +23,7 @@ val_interval=1
 
 # ============================ step 1/5 数据 ============================
 split_dir=os.path.join(DATA_DIR, "document_dataset")
+print('[Info] 文件夹地址: {}'.format(split_dir))
 train_dir=os.path.join(split_dir, "train")
 valid_dir=os.path.join(split_dir, "valid")
 
