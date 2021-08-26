@@ -3,19 +3,16 @@ sys.path.append('./data')
 sys.path.append('./model')
 
 import os
-import random
-import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 import torch.optim as optim
-from matplotlib import pyplot as plt
 from dataset import flowerDataset
 from model.model import MobileNetV3_large
-from model.model import MobileNetV3_small
-import torchvision
 from torch.autograd import Variable
+
+from root_dir import DATA_DIR
 
 #宏定义一些数据，如epoch数，batchsize等
 MAX_EPOCH=50
@@ -25,9 +22,9 @@ log_interval=3
 val_interval=1
 
 # ============================ step 1/5 数据 ============================
-split_dir=os.path.join(".","data","splitData")
-train_dir=os.path.join(split_dir,"train")
-valid_dir=os.path.join(split_dir,"valid")
+split_dir=os.path.join(DATA_DIR, "document_dataset")
+train_dir=os.path.join(split_dir, "train")
+valid_dir=os.path.join(split_dir, "valid")
 
 #对训练集所需要做的预处理
 train_transform=transforms.Compose([
