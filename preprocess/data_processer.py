@@ -4,8 +4,15 @@
 Copyright (c) 2021. All rights reserved.
 Created by C. L. Wang on 26.8.21
 """
+import os
+import sys
 import cv2
 import xml.dom.minidom
+from multiprocessing.pool import Pool
+
+p = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if p not in sys.path:
+    sys.path.append(p)
 
 from myutils.project_utils import *
 from root_dir import DATA_DIR
@@ -130,6 +137,21 @@ class SampleLabeledParser(object):
             data_dict[label_dict[int(label)]] += 1
         print("data_dict: {}".format(data_dict))
 
+    @staticmethod
+    def process_data(data_idx, url, label, dataset_dir):
+        if label == "0":
+            label_str = str(str(0).zfill(3))
+            out_label_dir = os.path.join(dataset_dir, label_str)
+            mkdir_if_not_exist(out_label_dir)
+        else:
+            label_str = str(str(1).zfill(3))
+            out_label_dir = os.path.join(dataset_dir, label_str)
+            mkdir_if_not_exist(out_label_dir)
+        _, img_bgr = download_url_img(url)
+        out_name = os.path.join(out_label_dir, "{}_{}.jpg".format(str(data_idx).zfill(6), str(str(label).zfill(3))))
+        cv2.imwrite(out_name, img_bgr)
+        print('[Info] label: {}, idx: {}'.format(label_str, data_idx))
+
     def make_dataset(self):
         file_name = os.path.join(DATA_DIR, "files", "out_labeled_urls.txt")
         print('[Info] label文件: {}'.format(file_name))
@@ -137,20 +159,16 @@ class SampleLabeledParser(object):
         mkdir_if_not_exist(dataset_dir)
         data_lines = read_file(file_name)
         print('[Info] 样本数: {}'.format(len(data_lines)))
+        pool = Pool(processes=100)
         for data_idx, data_line in enumerate(data_lines):
             url, label = data_line.split("\t")
-            if label == "0":
-                label_str = str(str(0).zfill(3))
-                out_label_dir = os.path.join(dataset_dir, label_str)
-                mkdir_if_not_exist(out_label_dir)
-            else:
-                label_str = str(str(1).zfill(3))
-                out_label_dir = os.path.join(dataset_dir, label_str)
-                mkdir_if_not_exist(out_label_dir)
-            _, img_bgr = download_url_img(url)
-            out_name = os.path.join(out_label_dir, "{}_{}.jpg".format(str(data_idx).zfill(6), str(str(label).zfill(3))))
-            cv2.imwrite(out_name, img_bgr)
-            print('[Info] label: {}, idx: {}'.format(label_str, data_idx))
+            pool.apply_async(SampleLabeledParser.process_data, (data_idx, url, label, dataset_dir))
+            # _, img_bgr = download_url_img(url)
+            # out_name = os.path.join(out_label_dir, "{}_{}.jpg".format(str(data_idx).zfill(6), str(str(label).zfill(3))))
+            # cv2.imwrite(out_name, img_bgr)
+            # print('[Info] label: {}, idx: {}'.format(label_str, data_idx))
+        pool.close()
+        pool.join()
         print('[Info] 全部写入完成: {}'.format(dataset_dir))
 
 
