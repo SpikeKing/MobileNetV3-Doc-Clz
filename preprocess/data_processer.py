@@ -6,9 +6,10 @@ Created by C. L. Wang on 26.8.21
 """
 import os
 import sys
+from multiprocessing.pool import Pool
+
 import cv2
 import xml.dom.minidom
-from multiprocessing.pool import Pool
 
 p = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if p not in sys.path:
@@ -139,6 +140,13 @@ class SampleLabeledParser(object):
 
     @staticmethod
     def process_data(data_idx, url, label, dataset_dir):
+        if data_idx < 1000:
+            dataset_dir = os.path.join(dataset_dir, "test")
+        elif 1000 <= data_idx < 2000:
+            dataset_dir = os.path.join(dataset_dir, "val")
+        else:
+            dataset_dir = os.path.join(dataset_dir, "train")
+
         if label == "0":
             label_str = str(str(0).zfill(3))
             out_label_dir = os.path.join(dataset_dir, label_str)

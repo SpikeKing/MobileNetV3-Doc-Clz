@@ -12,8 +12,8 @@ import torchvision.transforms as transforms
 import torch.optim as optim
 from matplotlib import pyplot as plt
 from dataset import flowerDataset
-from model import MobileNetV3_large
-from model import MobileNetV3_small
+from model.model import MobileNetV3_large
+from model.model import MobileNetV3_small
 import torchvision
 from torch.autograd import Variable
 
