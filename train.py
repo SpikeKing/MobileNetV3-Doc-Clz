@@ -50,7 +50,7 @@ train_loader=DataLoader(dataset=train_data,batch_size=BATCH_SIZE,shuffle=True)
 valid_loader=DataLoader(dataset=valid_data,batch_size=BATCH_SIZE)
 
 # ============================ step 2/5 模型 ============================
-net=MobileNetV3_large(num_classes=17)
+net=MobileNetV3_large(num_classes=2)
 if torch.cuda.is_available():
     net.cuda()
 # ============================ step 3/5 损失函数 ============================
