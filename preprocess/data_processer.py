@@ -147,14 +147,11 @@ class SampleLabeledParser(object):
         else:
             dataset_dir = os.path.join(dataset_dir, "train")
 
-        if label == "0":
-            label_str = str(str(0).zfill(3))
-            out_label_dir = os.path.join(dataset_dir, label_str)
-            mkdir_if_not_exist(out_label_dir)
-        else:
-            label_str = str(str(1).zfill(3))
-            out_label_dir = os.path.join(dataset_dir, label_str)
-            mkdir_if_not_exist(out_label_dir)
+        # 根据数据集，设置数据量
+        label_str = str(str(label).zfill(3))
+        out_label_dir = os.path.join(dataset_dir, label_str)
+        mkdir_if_not_exist(out_label_dir)
+
         _, img_bgr = download_url_img(url)
         out_name = os.path.join(out_label_dir, "{}_{}.jpg".format(str(data_idx).zfill(6), str(str(label).zfill(3))))
         cv2.imwrite(out_name, img_bgr)
