@@ -15,17 +15,18 @@ from torch.autograd import Variable
 from root_dir import DATA_DIR
 
 #宏定义一些数据，如epoch数，batchsize等
-MAX_EPOCH=50
+MAX_EPOCH=100
 BATCH_SIZE=64
 LR=0.0001
 log_interval=3
 val_interval=1
+num_of_class = 6
 
 # ============================ step 1/5 数据 ============================
-split_dir=os.path.join(DATA_DIR, "document_dataset")
+split_dir=os.path.join(DATA_DIR, "document_dataset_v2_1")
 print('[Info] 文件夹地址: {}'.format(split_dir))
 train_dir=os.path.join(split_dir, "train")
-valid_dir=os.path.join(split_dir, "valid")
+valid_dir=os.path.join(split_dir, "val")
 
 #对训练集所需要做的预处理
 train_transform=transforms.Compose([
@@ -50,7 +51,7 @@ train_loader=DataLoader(dataset=train_data,batch_size=BATCH_SIZE,shuffle=True)
 valid_loader=DataLoader(dataset=valid_data,batch_size=BATCH_SIZE)
 
 # ============================ step 2/5 模型 ============================
-net=MobileNetV3_large(num_classes=2)
+net=MobileNetV3_large(num_classes=num_of_class)
 if torch.cuda.is_available():
     net.cuda()
 # ============================ step 3/5 损失函数 ============================
