@@ -160,7 +160,7 @@ class SampleLabeledParser(object):
     def make_dataset(self):
         file_name = os.path.join(DATA_DIR, "files", "out_labeled_urls.txt")
         print('[Info] label文件: {}'.format(file_name))
-        dataset_dir = os.path.join(DATA_DIR, "document_dataset")
+        dataset_dir = os.path.join(DATA_DIR, "document_dataset_v2")
         mkdir_if_not_exist(dataset_dir)
         data_lines = read_file(file_name)
         print('[Info] 样本数: {}'.format(len(data_lines)))
