@@ -139,47 +139,102 @@ class SampleLabeledParser(object):
         print("data_dict: {}".format(data_dict))
 
     @staticmethod
-    def process_data(data_idx, url, label, dataset_dir):
-        if data_idx < 1000:
-            dataset_dir = os.path.join(dataset_dir, "test")
-        elif 1000 <= data_idx < 2000:
-            dataset_dir = os.path.join(dataset_dir, "val")
-        else:
-            dataset_dir = os.path.join(dataset_dir, "train")
-
+    def process_data(data_idx, url, label, dataset_dir, data_type):
         # 根据数据集，设置数据量
         label_str = str(str(label).zfill(3))
         out_label_dir = os.path.join(dataset_dir, label_str)
         mkdir_if_not_exist(out_label_dir)
 
         _, img_bgr = download_url_img(url)
-        out_name = os.path.join(out_label_dir, "{}_{}.jpg".format(str(data_idx).zfill(6), str(str(label).zfill(3))))
+        out_name = os.path.join(out_label_dir, "{}_{}_{}.jpg".format(data_type, str(data_idx).zfill(6), str(str(label).zfill(3))))
         cv2.imwrite(out_name, img_bgr)
         print('[Info] label: {}, idx: {}'.format(label_str, data_idx))
 
     def make_dataset(self):
-        file_name = os.path.join(DATA_DIR, "files", "out_labeled_urls.txt")
-        print('[Info] label文件: {}'.format(file_name))
-        dataset_dir = os.path.join(DATA_DIR, "document_dataset_v2")
-        mkdir_if_not_exist(dataset_dir)
-        data_lines = read_file(file_name)
-        print('[Info] 样本数: {}'.format(len(data_lines)))
+        train_file_name = os.path.join(DATA_DIR, "files", "out_labeled_urls_train_balanced.txt")
+        print('[Info] label文件: {}'.format(train_file_name))
+        train_dir = os.path.join(DATA_DIR, "document_dataset_v2_1", "train")
+        mkdir_if_not_exist(train_dir)
+        train_lines = read_file(train_file_name)
+        print('[Info] 样本数: {}'.format(len(train_lines)))
+
+        val_file_name = os.path.join(DATA_DIR, "files", "out_labeled_urls_val_balanced.txt")
+        print('[Info] label文件: {}'.format(val_file_name))
+        val_dir = os.path.join(DATA_DIR, "document_dataset_v2_1", "val")
+        mkdir_if_not_exist(val_dir)
+        val_lines = read_file(val_file_name)
+        print('[Info] 样本数: {}'.format(len(val_lines)))
+
         pool = Pool(processes=100)
-        for data_idx, data_line in enumerate(data_lines):
+        for data_idx, data_line in enumerate(train_lines):
             url, label = data_line.split("\t")
-            pool.apply_async(SampleLabeledParser.process_data, (data_idx, url, label, dataset_dir))
-            # _, img_bgr = download_url_img(url)
-            # out_name = os.path.join(out_label_dir, "{}_{}.jpg".format(str(data_idx).zfill(6), str(str(label).zfill(3))))
-            # cv2.imwrite(out_name, img_bgr)
-            # print('[Info] label: {}, idx: {}'.format(label_str, data_idx))
+            pool.apply_async(SampleLabeledParser.process_data, (data_idx, url, label, train_dir, "train"))
+
+        for data_idx, data_line in enumerate(val_lines):
+            url, label = data_line.split("\t")
+            pool.apply_async(SampleLabeledParser.process_data, (data_idx, url, label, val_dir, "val"))
         pool.close()
         pool.join()
-        print('[Info] 全部写入完成: {}'.format(dataset_dir))
+        print('[Info] 全部写入完成: {}'.format(train_dir))
+
+    def balance_samples(self):
+        file_path = os.path.join(DATA_DIR, "files", "out_labeled_urls.txt")
+        train_file_path = os.path.join(DATA_DIR, "files", "out_labeled_urls_train_balanced.txt")
+        val_file_path = os.path.join(DATA_DIR, "files", "out_labeled_urls_val_balanced.txt")
+        print("[Info] 文件路径: {}".format(file_path))
+        data_lines = read_file(file_path)
+        print("[Info] 样本数: {}".format(file_path))
+        img_label_dict = collections.defaultdict(list)
+        for data_line in data_lines:
+            img_url, img_label = data_line.split("\t")
+            img_label_dict[img_label].append(img_url)
+        print_data_dict(img_label_dict)
+
+        train_dict = collections.defaultdict(list)
+        val_dict = collections.defaultdict(list)
+
+        for img_label in img_label_dict.keys():
+            samples = img_label_dict[img_label]
+            gap = len(samples) // 10
+            val_dict[img_label] = samples[0:gap]
+            train_dict[img_label] = samples[gap:]
+
+        num = 20000
+        for img_label in train_dict.keys():
+            samples = train_dict[img_label]
+            samples = expand_sample_list(samples, num)
+            train_dict[img_label] = samples
+
+        num = 2000
+        for img_label in val_dict.keys():
+            samples = val_dict[img_label]
+            samples = expand_sample_list(samples, num)
+            val_dict[img_label] = samples
+
+        print_data_dict(train_dict)
+        out_list = []
+        for img_label in train_dict.keys():
+            samples = train_dict[img_label]
+            for sample in samples:
+                out_list.append("{}\t{}".format(sample, img_label))
+        print('[Info] 样本数: {}'.format(len(out_list)))
+        write_list_to_file(train_file_path, out_list)
+        print('[Info] 写入完成: {}'.format(train_file_path))
+
+        print_data_dict(val_dict)
+        out_list = []
+        for img_label in val_dict.keys():
+            samples = val_dict[img_label]
+            for sample in samples:
+                out_list.append("{}\t{}".format(sample, img_label))
+        print('[Info] 样本数: {}'.format(len(out_list)))
+        write_list_to_file(val_file_path, out_list)
+        print('[Info] 写入完成: {}'.format(val_file_path))
 
 
 def main():
     slp = SampleLabeledParser()
-    slp.make_dataset()
+    slp.balance_samples()
 
 
 if __name__ == '__main__':

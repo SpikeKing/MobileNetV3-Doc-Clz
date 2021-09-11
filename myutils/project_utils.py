@@ -913,3 +913,29 @@ def check_english_str(string):
         return True
     else:
         return False
+
+
+def print_data_dict(data_dict):
+    """
+    打印dict
+    """
+    label_list = data_dict.keys()
+    label_list = sorted(label_list)
+    print("[Info] " + "-" * 50)
+    for label in label_list:
+        print("[Info] label: {}, nums: {}".format(label, len(data_dict[label])))
+    print("[Info] " + "-" * 50)
+
+
+def expand_sample_list(a_list, num):
+    """
+    扩展到固定数量的样本
+    """
+    a_n = len(a_list)
+    n_piece = num // a_n + 1
+    random.seed(47)
+    random.shuffle(a_list)
+    x_list = a_list * n_piece
+    random.shuffle(x_list)
+    x_list = x_list[:num]
+    return x_list
