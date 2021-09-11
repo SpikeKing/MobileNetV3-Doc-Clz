@@ -96,11 +96,11 @@ for epoch in range(MAX_EPOCH):
         # print("相等的结果为：",predicted == label)
         correct += (predicted == label).sum()
     print("============================================")
-    accurancy=correct / total
+    accurancy = float(correct) / float(total)
     if accurancy>accurancy_global:
         torch.save(net.state_dict(), './weights/best.pkl')
         print("准确率由：", accurancy_global, "上升至：", accurancy, "已更新并保存权值为weights/best.pkl")
         accurancy_global=accurancy
-    print('第%d个epoch的识别准确率为：%d%%' % (epoch + 1, 100*accurancy))
+    print('第%d个epoch的识别准确率为：%d%%, correct: %d, total: %d' % (epoch + 1, 100*accurancy, correct, total))
 torch.save(net.state_dict(), './weights/last.pkl')
 print("训练完毕，权重已保存为：weights/last.pkl")
