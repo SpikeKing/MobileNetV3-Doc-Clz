@@ -177,7 +177,7 @@ class SampleLabeledParser(object):
         pool.join()
         print('[Info] 全部写入完成: {}'.format(train_dir))
 
-    def make_dataset(self):
+    def balance_samples(self):
         file_path = os.path.join(DATA_DIR, "files", "out_labeled_urls.txt")
         train_file_path = os.path.join(DATA_DIR, "files", "out_labeled_urls_train_balanced.txt")
         val_file_path = os.path.join(DATA_DIR, "files", "out_labeled_urls_val_balanced.txt")
@@ -234,7 +234,7 @@ class SampleLabeledParser(object):
 
 def main():
     slp = SampleLabeledParser()
-    slp.balance_samples()
+    slp.make_dataset()
 
 
 if __name__ == '__main__':
