@@ -153,7 +153,7 @@ class SampleLabeledParser(object):
             out_name = "{}_{}_{}.jpg".format(data_type, str(data_idx).zfill(6), str(str(label).zfill(3)))
         else:
             out_name = "{}_{}.jpg".format(str(data_idx).zfill(6), str(str(label).zfill(3)))
-        
+
         out_path = os.path.join(out_label_dir, out_name)
         cv2.imwrite(out_path, img_bgr)
         print('[Info] label: {}, idx: {}'.format(label_str, data_idx))
@@ -161,16 +161,18 @@ class SampleLabeledParser(object):
     def make_dataset(self):
         train_file_name = os.path.join(DATA_DIR, "files", "out_labeled_urls_train_balanced.txt")
         print('[Info] label文件: {}'.format(train_file_name))
-        train_dir = os.path.join(DATA_DIR, "document_dataset_v2_1", "train")
+        train_dir = os.path.join(DATA_DIR, "document_dataset_mini", "train")
         mkdir_if_not_exist(train_dir)
         train_lines = read_file(train_file_name)
+        train_lines = train_lines[:16]
         print('[Info] 样本数: {}'.format(len(train_lines)))
 
         val_file_name = os.path.join(DATA_DIR, "files", "out_labeled_urls_val_balanced.txt")
         print('[Info] label文件: {}'.format(val_file_name))
-        val_dir = os.path.join(DATA_DIR, "document_dataset_v2_1", "val")
+        val_dir = os.path.join(DATA_DIR, "document_dataset_mini", "val")
         mkdir_if_not_exist(val_dir)
         val_lines = read_file(val_file_name)
+        val_lines = val_lines[:16]
         print('[Info] 样本数: {}'.format(len(val_lines)))
 
         pool = Pool(processes=100)
@@ -258,7 +260,7 @@ class SampleLabeledParser(object):
 
 def main():
     slp = SampleLabeledParser()
-    slp.make_dataset_v2()
+    slp.make_dataset()
 
 
 if __name__ == '__main__':
