@@ -139,15 +139,23 @@ class SampleLabeledParser(object):
         print("data_dict: {}".format(data_dict))
 
     @staticmethod
-    def process_data(data_idx, url, label, dataset_dir, data_type):
+    def process_data(data_idx, url, label, dataset_dir, data_type=""):
         # 根据数据集，设置数据量
         label_str = str(str(label).zfill(3))
-        out_label_dir = os.path.join(dataset_dir, label_str)
+        if data_type:
+            out_label_dir = os.path.join(dataset_dir, label_str)
+        else:
+            out_label_dir = dataset_dir
         mkdir_if_not_exist(out_label_dir)
 
         _, img_bgr = download_url_img(url)
-        out_name = os.path.join(out_label_dir, "{}_{}_{}.jpg".format(data_type, str(data_idx).zfill(6), str(str(label).zfill(3))))
-        cv2.imwrite(out_name, img_bgr)
+        if data_type:
+            out_name = "{}_{}_{}.jpg".format(data_type, str(data_idx).zfill(6), str(str(label).zfill(3)))
+        else:
+            out_name = "{}_{}.jpg".format(str(data_idx).zfill(6), str(str(label).zfill(3)))
+        
+        out_path = os.path.join(out_label_dir, out_name)
+        cv2.imwrite(out_path, img_bgr)
         print('[Info] label: {}, idx: {}'.format(label_str, data_idx))
 
     def make_dataset(self):
@@ -176,6 +184,22 @@ class SampleLabeledParser(object):
         pool.close()
         pool.join()
         print('[Info] 全部写入完成: {}'.format(train_dir))
+
+    def make_dataset_v2(self):
+        out_file_name = os.path.join(DATA_DIR, "files", "out_labeled_urls_balanced.txt")
+        print('[Info] label文件: {}'.format(out_file_name))
+        out_dir = os.path.join(DATA_DIR, "document_dataset_v2_2")
+        mkdir_if_not_exist(out_dir)
+        train_lines = read_file(out_file_name)
+        print('[Info] 样本数: {}'.format(len(train_lines)))
+
+        pool = Pool(processes=100)
+        for data_idx, data_line in enumerate(train_lines):
+            url, label = data_line.split("\t")
+            pool.apply_async(SampleLabeledParser.process_data, (data_idx, url, label, out_dir))
+        pool.close()
+        pool.join()
+        print('[Info] 全部写入完成: {}'.format(out_dir))
 
     def balance_samples(self):
         file_path = os.path.join(DATA_DIR, "files", "out_labeled_urls.txt")
@@ -234,7 +258,7 @@ class SampleLabeledParser(object):
 
 def main():
     slp = SampleLabeledParser()
-    slp.make_dataset()
+    slp.make_dataset_v2()
 
 
 if __name__ == '__main__':
