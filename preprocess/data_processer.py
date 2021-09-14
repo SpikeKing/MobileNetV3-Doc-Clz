@@ -164,7 +164,6 @@ class SampleLabeledParser(object):
         train_dir = os.path.join(DATA_DIR, "document_dataset_mini", "train")
         mkdir_if_not_exist(train_dir)
         train_lines = read_file(train_file_name)
-        train_lines = train_lines[:16]
         print('[Info] 样本数: {}'.format(len(train_lines)))
 
         val_file_name = os.path.join(DATA_DIR, "files", "out_labeled_urls_val_balanced.txt")
@@ -172,17 +171,25 @@ class SampleLabeledParser(object):
         val_dir = os.path.join(DATA_DIR, "document_dataset_mini", "val")
         mkdir_if_not_exist(val_dir)
         val_lines = read_file(val_file_name)
-        val_lines = val_lines[:16]
         print('[Info] 样本数: {}'.format(len(val_lines)))
 
+        train_label_dict = collections.defaultdict(int)
+        val_label_dict = collections.defaultdict(int)
         pool = Pool(processes=100)
         for data_idx, data_line in enumerate(train_lines):
             url, label = data_line.split("\t")
+            if train_label_dict[label] == 16:
+                continue
             pool.apply_async(SampleLabeledParser.process_data, (data_idx, url, label, train_dir, "train"))
+            train_label_dict[label] += 1
 
         for data_idx, data_line in enumerate(val_lines):
             url, label = data_line.split("\t")
+            if val_label_dict[label] == 16:
+                continue
             pool.apply_async(SampleLabeledParser.process_data, (data_idx, url, label, val_dir, "val"))
+            val_label_dict[label] += 1
+
         pool.close()
         pool.join()
         print('[Info] 全部写入完成: {}'.format(train_dir))
