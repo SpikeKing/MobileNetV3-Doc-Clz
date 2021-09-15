@@ -3,6 +3,9 @@ sys.path.append('./data')
 sys.path.append('./model')
 
 import torch
+import numpy as np
+
+from torch.nn import functional as F
 import torchvision.transforms as transforms
 from model.model import MobileNetV3_large
 from PIL import Image
@@ -45,6 +48,9 @@ class Detector(object):
         net_output = self.net(img_tensor)
         print(net_output)
         _, predicted = torch.max(net_output.data, 1)
+        p = F.softmax(net_output.data, dim=1).numpy()[0]
+        p = list(np.around(p, 3))
+        print("[Info] prop: {}".format(p))
         result = predicted[0].item()
         print("预测的结果为：", result)
 
