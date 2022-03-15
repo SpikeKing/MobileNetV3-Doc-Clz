@@ -12,18 +12,16 @@ from dataset import flowerDataset
 from model.model import MobileNetV3_large
 from torch.autograd import Variable
 
-from root_dir import DATA_DIR
-
 #宏定义一些数据，如epoch数，batchsize等
-MAX_EPOCH=100
+MAX_EPOCH=1000
 BATCH_SIZE=64
 LR=0.0001
 log_interval=3
 val_interval=1
-num_of_class = 6
+num_of_class = 3
 
 # ============================ step 1/5 数据 ============================
-split_dir=os.path.join(DATA_DIR, "document_dataset_v2_1")
+split_dir = "/ProjectRoot/workspace/handwrite_remove/mydata/regions_clz_data_mini"
 print('[Info] 文件夹地址: {}'.format(split_dir))
 train_dir=os.path.join(split_dir, "train")
 valid_dir=os.path.join(split_dir, "val")

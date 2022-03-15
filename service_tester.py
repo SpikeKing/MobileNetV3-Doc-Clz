@@ -55,7 +55,6 @@ class ServiceTester(object):
         out_html = os.path.join(self.out_folder, "val_{}.html".format(time_str))
         pool = Pool(processes=100)
         for img_idx, img_path in enumerate(paths_list):
-            # ServiceTester.process_img_path(img_idx, img_path, self.service, out_file)
             pool.apply_async(ServiceTester.process_img_path, (img_idx, img_path, self.service, out_file))
         pool.close()
         pool.join()
@@ -85,7 +84,6 @@ def parse_args():
     arg_in_folder = args.in_folder
     print("测试文件夹: {}".format(arg_in_folder))
 
-    # ysu362VFeRZkizhfBkfbck
     arg_service = args.service
     print("服务: {}".format(arg_service))
 
